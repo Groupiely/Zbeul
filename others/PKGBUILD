@@ -1,0 +1,57 @@
+# Maintainer: Custom Build
+
+_pkgname="xone"
+pkgname="xone-dkms-git-custom"
+pkgver=0.5.8.r0.gf2aa9fe
+pkgrel=1
+pkgdesc='Modern Linux driver for Xbox One and Xbox Series X|S controllers (Custom Override Build)'
+url="https://github.com/dlundqvist/xone"
+license=('GPL-2.0-or-later')
+arch=('any')
+
+depends=(
+  'dkms'
+  'xone-dongle-firmware'
+)
+makedepends=(
+  'git'
+)
+
+provides=('xone-dkms')
+conflicts=('xone-dkms' 'xone-dkms-git')
+
+_pkgsrc="dlundqvist.xone"
+source=(
+  "$_pkgsrc"::"git+$url.git"
+  "xone-custom-dongle.patch::https://raw.githubusercontent.com/Groupiely/Zbeul/main/dotpatches/xone-custom-dongle.patch"
+)
+sha256sums=('SKIP'
+            'd322777407acf6563636a6af42b76ddfae3bd36da81fad1a89fc305865896422')
+
+pkgver() {
+  cd "$_pkgsrc"
+  git describe --long --tags --abbrev=7 --exclude='*[a-zA-Z][a-zA-Z]*' \
+    | sed -E 's/^[^0-9]*//;s/([^-]*-g)/r\1/;s/-/./g'
+}
+
+prepare() {
+  cd "$_pkgsrc"
+  # Apply your custom patch to the downloaded source files
+  patch -Np1 -i "../xone-custom-dongle.patch"
+}
+
+package() {
+  # set module version
+  find "$_pkgsrc" -type f \( -name 'dkms.conf' -o -name '*.c' \) -exec sed -i "s/#VERSION#/$pkgver/" {} +
+
+  if [[ "${_build_debug::1}" == "t" ]]; then
+    echo 'ccflags-y += -DDEBUG' >> "$_pkgsrc/Kbuild"
+  fi
+
+  # copy module to /usr/src
+  mkdir -pm755 "$pkgdir/usr/src/$_pkgname-$pkgver"
+  cp -a "$_pkgsrc"/* "$pkgdir/usr/src/$_pkgname-$pkgver/"
+
+  # blacklist xpad module
+  install -Dm644 "$_pkgsrc/install/modprobe.conf" "$pkgdir/usr/lib/modprobe.d/xone-blacklist.conf"
+}
