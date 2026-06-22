@@ -1,0 +1,26 @@
+diff --git a/transport/dongle.c b/transport/dongle.c
+index fb5494b..a643bde 100644
+--- a/transport/dongle.c
++++ b/transport/dongle.c
+@@ -18,7 +18,7 @@
+ #include "mt76.h"
+ #include "../bus/bus.h"
+ 
+-ushort fw_override_pid = 0;
++ushort fw_override_pid = 0x02e6;
+ MODULE_PARM_DESC(fw_override, "Use firmware for the provided product ID instead of the one detected automatically");
+ module_param_named(fw_override, fw_override_pid, ushort, 0600);
+ 
+diff --git a/transport/mt76.c b/transport/mt76.c
+index ecdbde4..9d64441 100644
+--- a/transport/mt76.c
++++ b/transport/mt76.c
+@@ -69,7 +69,7 @@ struct xone_mt76_msg_switch_channel {
+ 	u8 unknown;
+ } __packed;
+ 
+-static char override_mac[ETH_ALEN] = { 0 };
++static char override_mac[ETH_ALEN] = { 0x00, 0x50, 0xf2, 0x21, 0x44, 0x01 };
+ module_param_array(override_mac, byte, NULL, 0444);
+ MODULE_PARM_DESC(override_mac, "Override MAC address (6 bytes), helps deconflict counterfeit adapters");
+ 
