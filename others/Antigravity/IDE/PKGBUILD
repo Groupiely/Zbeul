@@ -1,0 +1,83 @@
+# Maintainer: Groupiely
+
+# Dynamically generate the install script if missing when makepkg sources this file
+if [ ! -f "antigravity-ide.install" ]; then
+    cat <<'EOF' > "antigravity-ide.install"
+post_remove() {
+    # Resolve the user's home directory to clean up runtime configurations
+    local real_user="${SUDO_USER:-$USER}"
+    local real_home=$(getent passwd "${real_user}" | cut -d: -f6)
+    
+    if [ -d "${real_home}/.gemini/antigravity-ide" ]; then
+        echo "Removing configurations at ${real_home}/.gemini/antigravity-ide..."
+        rm -rf "${real_home}/.gemini/antigravity-ide"
+    fi
+}
+EOF
+fi
+
+pkgname=antigravity-ide
+pkgver=2.1.1
+_build=6123990880747520
+pkgrel=1
+pkgdesc="Google Antigravity IDE agentic development platform"
+arch=('x86_64')
+url="https://antigravity.google/"
+license=('custom')
+depends=('alsa-lib' 'gtk3' 'nss' 'nspr' 'libxss' 'libxtst')
+options=('!strip' '!debug')
+install=antigravity-ide.install
+source=("Antigravity_IDE.tar.gz::https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/${pkgver}-${_build}/linux-x64/Antigravity%20IDE.tar.gz"
+        "code.svg::https://raw.githubusercontent.com/Groupiely/Zbeul/main/others/Antigravity/IDE/code.svg")
+sha512sums=('SKIP'
+            'SKIP')
+
+package() {
+    # 1. Extract to $HOME/.local/share/Antigravity IDE
+    install -d "${pkgdir}/${HOME}/.local/share/Antigravity IDE"
+    
+    # Locate the extracted directory matching "Antigravity IDE*"
+    local ext_dir=$(find "${srcdir}" -maxdepth 1 -type d -name "Antigravity IDE*" | head -n 1)
+    cp -a "${ext_dir}/"* "${pkgdir}/${HOME}/.local/share/Antigravity IDE/"
+    
+    # 2. Create symlink of launcher bin to $HOME/.local/bin/
+    install -d "${pkgdir}/${HOME}/.local/bin"
+    ln -sf "../share/Antigravity IDE/bin/antigravity-ide" "${pkgdir}/${HOME}/.local/bin/antigravity-ide"
+    
+    # 3. Resolve icon path using $XCURSOR_PATH fallback
+    local icon_dir=""
+    if [ -n "${XCURSOR_PATH}" ]; then
+        IFS=':' read -ra ADDR <<< "${XCURSOR_PATH}"
+        for p in "${ADDR[@]}"; do
+            if [[ "${p}" == "${HOME}"* ]]; then
+                icon_dir="${p}"
+                break
+            fi
+        done
+    fi
+    if [ -z "${icon_dir}" ]; then
+        icon_dir="${HOME}/.local/share/icons"
+    fi
+    
+    install -d "${pkgdir}/${icon_dir}"
+    cp "${srcdir}/code.svg" "${pkgdir}/${icon_dir}/code.svg"
+    
+    # 4. Create desktop file
+    install -d "${pkgdir}/${HOME}/.local/share/applications"
+    cat <<EOF > "${pkgdir}/${HOME}/.local/share/applications/antigravity-ide.desktop"
+[Desktop Entry]
+Version=2.0
+Name=Antigravity IDE
+Comment=Google Antigravity IDE agentic development platform
+Exec=${HOME}/.local/bin/antigravity-ide
+Terminal=false
+Type=Application
+Icon=code
+Categories=Development;IDE;IA;LLM;antigravity;gemini
+StartupNotify=false
+EOF
+    chmod 644 "${pkgdir}/${HOME}/.local/share/applications/antigravity-ide.desktop"
+    
+    # Pre-create config directory to register it in package list
+    install -d "${pkgdir}/${HOME}/.gemini/antigravity-ide"
+}

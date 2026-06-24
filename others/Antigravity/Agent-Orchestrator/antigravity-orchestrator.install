@@ -1,0 +1,10 @@
+post_remove() {
+    # Resolve the user's home directory to clean up runtime configurations
+    local real_user="${SUDO_USER:-$USER}"
+    local real_home=$(getent passwd "${real_user}" | cut -d: -f6)
+    
+    if [ -d "${real_home}/.gemini/antigravity" ]; then
+        echo "Removing configurations at ${real_home}/.gemini/antigravity..."
+        rm -rf "${real_home}/.gemini/antigravity"
+    fi
+}

@@ -1,0 +1,114 @@
+# Maintainer: Groupiely
+
+# Dynamically generate the install script if missing when makepkg sources this file
+if [ ! -f "antigravity-cli.install" ]; then
+    cat <<'EOF' > "antigravity-cli.install"
+post_install() {
+    # Run the native setup to configure shell integration
+    local real_user="${SUDO_USER:-$USER}"
+    local real_home=$(getent passwd "${real_user}" | cut -d: -f6)
+    
+    if [ -x "${real_home}/.local/bin/agy" ]; then
+        echo "Running agy install for user ${real_user}..."
+        su - "${real_user}" -c "${real_home}/.local/bin/agy install" || true
+    fi
+    
+    # Inform the user about alternate icons
+    echo "========================================================================="
+    echo "  Antigravity CLI installed successfully!"
+    echo "  Multiple icon options have been installed to your local icon path:"
+    echo "    - agy.svg  (Transparent SVG - Default)"
+    echo "    - agyb.svg (Black Background SVG)"
+    echo "    - agy.png  (High-Res PNG)"
+    echo ""
+    echo "  To use the black background version, edit the desktop file launcher at:"
+    echo "  ${real_home}/.local/share/applications/antigravity-cli.desktop"
+    echo "  and change: Icon=agy  ->  Icon=agyb"
+    echo "========================================================================="
+}
+
+post_remove() {
+    local real_user="${SUDO_USER:-$USER}"
+    local real_home=$(getent passwd "${real_user}" | cut -d: -f6)
+    
+    # Clean up the config directories
+    if [ -d "${real_home}/.gemini/antigravity-cli" ]; then
+        echo "Removing CLI configurations at ${real_home}/.gemini/antigravity-cli..."
+        rm -rf "${real_home}/.gemini/antigravity-cli"
+    fi
+    
+    # Also clean up the main config folder if it's empty
+    if [ -d "${real_home}/.gemini" ]; then
+        rmdir "${real_home}/.gemini/config" 2>/dev/null || true
+        rmdir "${real_home}/.gemini" 2>/dev/null || true
+    fi
+}
+EOF
+fi
+
+pkgname=antigravity-cli
+pkgver=1.0.10
+_build=6349723456634880
+pkgrel=1
+pkgdesc="Google Antigravity CLI companion tool"
+arch=('x86_64')
+url="https://antigravity.google/"
+license=('custom')
+depends=('glibc')
+options=('!strip' '!debug')
+install=antigravity-cli.install
+source=("cli_linux_x64.tar.gz::https://storage.googleapis.com/antigravity-public/antigravity-cli/${pkgver}-${_build}/linux-x64/cli_linux_x64.tar.gz"
+        "agy.svg::https://raw.githubusercontent.com/Groupiely/Zbeul/main/others/Antigravity/CLI/agy.svg"
+        "agyb.svg::https://raw.githubusercontent.com/Groupiely/Zbeul/main/others/Antigravity/CLI/agyb.svg"
+        "agy.png::https://raw.githubusercontent.com/Groupiely/Zbeul/main/others/Antigravity/CLI/agy.png")
+sha512sums=('SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP')
+
+package() {
+    # 1. Extract/copy the binary to $HOME/.local/bin/agy
+    install -d "${pkgdir}/${HOME}/.local/bin"
+    # Inside the tar.gz, the binary is named 'antigravity'
+    install -m755 "${srcdir}/antigravity" "${pkgdir}/${HOME}/.local/bin/agy"
+    
+    # 2. Resolve icon path using $XCURSOR_PATH fallback
+    local icon_dir=""
+    if [ -n "${XCURSOR_PATH}" ]; then
+        IFS=':' read -ra ADDR <<< "${XCURSOR_PATH}"
+        for p in "${ADDR[@]}"; do
+            if [[ "${p}" == "${HOME}"* ]]; then
+                icon_dir="${p}"
+                break
+            fi
+        done
+    fi
+    if [ -z "${icon_dir}" ]; then
+        icon_dir="${HOME}/.local/share/icons"
+    fi
+    
+    # 3. Install all icons (Default, Black Background, PNG)
+    install -d "${pkgdir}/${icon_dir}"
+    cp "${srcdir}/agy.svg" "${pkgdir}/${icon_dir}/agy.svg"
+    cp "${srcdir}/agyb.svg" "${pkgdir}/${icon_dir}/agyb.svg"
+    cp "${srcdir}/agy.png" "${pkgdir}/${icon_dir}/agy.png"
+    
+    # 4. Create desktop file (using default agy icon)
+    install -d "${pkgdir}/${HOME}/.local/share/applications"
+    cat <<EOF > "${pkgdir}/${HOME}/.local/share/applications/antigravity-cli.desktop"
+[Desktop Entry]
+Version=1.0
+Name=Antigravity CLI
+Comment=Google Antigravity CLI companion tool
+Exec=${HOME}/.local/bin/agy
+Terminal=true
+Type=Application
+Icon=agy
+Categories=Development;IA;LLM;antigravity;gemini
+StartupNotify=false
+EOF
+    chmod 644 "${pkgdir}/${HOME}/.local/share/applications/antigravity-cli.desktop"
+    
+    # Pre-create configuration directories to register them in package database
+    install -d "${pkgdir}/${HOME}/.gemini/antigravity-cli"
+}

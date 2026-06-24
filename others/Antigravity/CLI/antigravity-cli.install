@@ -1,0 +1,40 @@
+post_install() {
+    # Run the native setup to configure shell integration
+    local real_user="${SUDO_USER:-$USER}"
+    local real_home=$(getent passwd "${real_user}" | cut -d: -f6)
+    
+    if [ -x "${real_home}/.local/bin/agy" ]; then
+        echo "Running agy install for user ${real_user}..."
+        su - "${real_user}" -c "${real_home}/.local/bin/agy install" || true
+    fi
+    
+    # Inform the user about alternate icons
+    echo "========================================================================="
+    echo "  Antigravity CLI installed successfully!"
+    echo "  Multiple icon options have been installed to your local icon path:"
+    echo "    - agy.svg  (Transparent SVG - Default)"
+    echo "    - agyb.svg (Black Background SVG)"
+    echo "    - agy.png  (High-Res PNG)"
+    echo ""
+    echo "  To use the black background version, edit the desktop file launcher at:"
+    echo "  ${real_home}/.local/share/applications/antigravity-cli.desktop"
+    echo "  and change: Icon=agy  ->  Icon=agyb"
+    echo "========================================================================="
+}
+
+post_remove() {
+    local real_user="${SUDO_USER:-$USER}"
+    local real_home=$(getent passwd "${real_user}" | cut -d: -f6)
+    
+    # Clean up the config directories
+    if [ -d "${real_home}/.gemini/antigravity-cli" ]; then
+        echo "Removing CLI configurations at ${real_home}/.gemini/antigravity-cli..."
+        rm -rf "${real_home}/.gemini/antigravity-cli"
+    fi
+    
+    # Also clean up the main config folder if it's empty
+    if [ -d "${real_home}/.gemini" ]; then
+        rmdir "${real_home}/.gemini/config" 2>/dev/null || true
+        rmdir "${real_home}/.gemini" 2>/dev/null || true
+    fi
+}
