@@ -4,9 +4,10 @@
 # Allow first-level directories (to traverse them)
 !*/
 
-# Track PKGBUILD and README.md only in the first-level directories
+# Track PKGBUILD, README.md, and checksums.txt in the first-level directories
 !*/PKGBUILD
 !*/README.md
+!*/checksums.txt
 
 # Allow the root .gitignore file
 !.gitignore
@@ -18,6 +19,7 @@
 !*/Agent-Orchestrator/agyagent.svg
 !*/Agent-Orchestrator/agyagent.png
 !*/Agent-Orchestrator/README.md
+!*/Agent-Orchestrator/checksums.txt
 
 !*/CLI/
 !*/CLI/PKGBUILD
@@ -26,6 +28,7 @@
 !*/CLI/agyb.svg
 !*/CLI/agy.png
 !*/CLI/README.md
+!*/CLI/checksums.txt
 
 !*/IDE/
 !*/IDE/PKGBUILD
@@ -33,3 +36,6 @@
 !*/IDE/code.svg
 !*/IDE/code.png
 !*/IDE/README.md
+!*/IDE/checksums.txt
+
+!*/xone-dkms-git-custom/checksums.txt
