@@ -1,0 +1,11 @@
+# Ignore all files in /others/
+/others/*
+
+# Don't ignore directories inside /others
+!/others/*/
+
+# Ignore all files in /others/*/
+/others/*/*
+
+# except PKGBUILD
+!/others/*/PKGBUILD
