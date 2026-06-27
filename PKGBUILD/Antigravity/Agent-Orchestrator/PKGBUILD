@@ -1,20 +1,5 @@
-# Maintainer: Groupiely
-
-# Dynamically generate the install script if missing when makepkg sources this file
-if [ ! -f "antigravity-orchestrator.install" ]; then
-    cat <<'EOF' > "antigravity-orchestrator.install"
-post_remove() {
-    # Resolve the user's home directory to clean up runtime configurations
-    local real_user="${SUDO_USER:-$USER}"
-    local real_home=$(getent passwd "${real_user}" | cut -d: -f6)
-    
-    if [ -d "${real_home}/.gemini/antigravity" ]; then
-        echo "Removing configurations at ${real_home}/.gemini/antigravity..."
-        rm -rf "${real_home}/.gemini/antigravity"
-    fi
-}
-EOF
-fi
+# Maintainer: CheckTopLeft - Dont@reach.me
+# Remnants: ~/.gemini/antigravity (run post_remove or remove manually).
 
 pkgname=antigravity-orchestrator
 pkgver=2.1.4
@@ -23,48 +8,40 @@ pkgrel=1
 pkgdesc="Google Antigravity 2.0 multi-agent orchestration platform (Hub)"
 arch=('x86_64')
 url="https://antigravity.google/"
-license=('custom')
+license=('custom:Proprietary')
 depends=('alsa-lib' 'gtk3' 'nss' 'nspr' 'libxss' 'libxtst')
 options=('!strip' '!debug')
 install=antigravity-orchestrator.install
 source=("Antigravity.tar.gz::https://storage.googleapis.com/antigravity-public/antigravity-hub/${pkgver}-${_build}/linux-x64/Antigravity.tar.gz"
-        "antigravity_logo.svg::https://raw.githubusercontent.com/Groupiely/Zbeul/main/others/Antigravity/Agent-Orchestrator/antigravity_logo.svg")
+        "agyagent.svg::https://raw.githubusercontent.com/Groupiely/Zbeul/main/PKGBUILD/Antigravity/Agent-Orchestrator/agyagent.svg")
 sha512sums=('SKIP'
-            'SKIP')
+            'f821b24e72770e582d190d00c0f1ac63ef59a9e664eae8eb74da8a8f3272b5bbf9de96500d4802eca74e7912708edf28608ac498bce9b3d0e01173e7b8d831a7')
 
 package() {
-    # 1. Extract to $HOME/.local/share/Antigravity
-    install -d "${pkgdir}/${HOME}/.local/share/Antigravity"
-    
-    # Locate the extracted directory matching "Antigravity-*"
-    local ext_dir=$(find "${srcdir}" -maxdepth 1 -type d -name "Antigravity-*" | head -n 1)
-    cp -a "${ext_dir}/"* "${pkgdir}/${HOME}/.local/share/Antigravity/"
-    
-    # 2. Create symlink to $HOME/.local/bin/
-    install -d "${pkgdir}/${HOME}/.local/bin"
-    ln -sf "../share/Antigravity/antigravity" "${pkgdir}/${HOME}/.local/bin/antigravity"
-    
-    # 3. Resolve icon path using $XCURSOR_PATH fallback
-    local icon_dir=""
-    if [ -n "${XCURSOR_PATH}" ]; then
-        IFS=':' read -ra ADDR <<< "${XCURSOR_PATH}"
-        for p in "${ADDR[@]}"; do
-            if [[ "${p}" == "${HOME}"* ]]; then
-                icon_dir="${p}"
-                break
-            fi
-        done
-    fi
-    if [ -z "${icon_dir}" ]; then
-        icon_dir="${HOME}/.local/share/icons"
-    fi
-    
-    install -d "${pkgdir}/${icon_dir}"
-    cp "${srcdir}/antigravity_logo.svg" "${pkgdir}/${icon_dir}/antigravity_logo.svg"
-    
-    # 4. Create desktop file
-    install -d "${pkgdir}/${HOME}/.local/share/applications"
-    cat <<EOF > "${pkgdir}/${HOME}/.local/share/applications/antigravity-hub.desktop"
+  install -d "${pkgdir}/${HOME}/.local/share/Antigravity"
+  local ext_dir=$(find "${srcdir}" -maxdepth 1 -type d -name "Antigravity-*" | head -n 1)
+  cp -a "${ext_dir}/"* "${pkgdir}/${HOME}/.local/share/Antigravity/"
+
+  install -d "${pkgdir}/${HOME}/.local/bin"
+  ln -sf "../share/Antigravity/antigravity" "${pkgdir}/${HOME}/.local/bin/antigravity"
+
+  local icon_dir=""
+  if [ -n "${XCURSOR_PATH}" ]; then
+    IFS=':' read -ra ADDR <<< "${XCURSOR_PATH}"
+    for p in "${ADDR[@]}"; do
+      if [[ "${p}" == "${HOME}"* ]]; then
+        icon_dir="${p}"
+        break
+      fi
+    done
+  fi
+  [ -z "${icon_dir}" ] && icon_dir="${HOME}/.local/share/icons"
+
+  install -d "${pkgdir}/${icon_dir}"
+  cp "${srcdir}/agyagent.svg" "${pkgdir}/${icon_dir}/agyagent.svg"
+
+  install -d "${pkgdir}/${HOME}/.local/share/applications"
+  cat <<EOF > "${pkgdir}/${HOME}/.local/share/applications/antigravity-hub.desktop"
 [Desktop Entry]
 Version=2.0
 Name=Antigravity Hub
@@ -72,13 +49,11 @@ Comment=Google Antigravity 2.0 multi-agent orchestration platform
 Exec=${HOME}/.local/bin/antigravity
 Terminal=false
 Type=Application
-Icon=antigravity_logo
+Icon=agyagent
 Categories=IA;LLM;agent;agy;antigravity;gemini
 StartupNotify=false
 MimeType=x-scheme-handler/antigravity;
 EOF
-    chmod 644 "${pkgdir}/${HOME}/.local/share/applications/antigravity-hub.desktop"
-    
-    # Pre-create config directory to register it in package list
-    install -d "${pkgdir}/${HOME}/.gemini/antigravity"
+  chmod 644 "${pkgdir}/${HOME}/.local/share/applications/antigravity-hub.desktop"
+  install -d "${pkgdir}/${HOME}/.gemini/antigravity"
 }

@@ -4,8 +4,9 @@
 # Allow first-level directories (to traverse them)
 !*/
 
-# Track PKGBUILD only in the first-level directories
+# Track PKGBUILD and README.md only in the first-level directories
 !*/PKGBUILD
+!*/README.md
 
 # Allow the root .gitignore file
 !.gitignore
@@ -14,9 +15,9 @@
 !*/Agent-Orchestrator/
 !*/Agent-Orchestrator/PKGBUILD
 !*/Agent-Orchestrator/antigravity-orchestrator.install
-!*/Agent-Orchestrator/antigravity_logo.svg
 !*/Agent-Orchestrator/agyagent.svg
 !*/Agent-Orchestrator/agyagent.png
+!*/Agent-Orchestrator/README.md
 
 !*/CLI/
 !*/CLI/PKGBUILD
@@ -24,28 +25,11 @@
 !*/CLI/agy.svg
 !*/CLI/agyb.svg
 !*/CLI/agy.png
+!*/CLI/README.md
 
 !*/IDE/
 !*/IDE/PKGBUILD
 !*/IDE/antigravity-ide.install
 !*/IDE/code.svg
 !*/IDE/code.png
-
-# ==========================================
-# Exception Examples (Uncomment to use)
-# ==========================================
-
-# 1. Track a specific file at the root level of others/
-#!file.ext
-
-# 2. Track a specific file with no extension at the root level
-#!noextfile
-
-# 3. Ignore a specific first-level directory (so git clean deletes it)
-#somedir/
-
-# 4. Track a specific subdirectory (required for Git to traverse it)
-#!*/dirtokeep/
-
-# 5. Track a specific file inside a subdirectory
-#!*/dirtokeep/somefile
+!*/IDE/README.md
