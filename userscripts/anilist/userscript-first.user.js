@@ -1,11 +1,13 @@
 // ==UserScript==
 // @name         Anilist Streaming Links
-// @namespace    http://tampermonkey.net/
+// @namespace    https://github.com/Groupiely/Zbeul
 // @version      1.0.0
 // @description  Adds streaming platform icons to the top of Anilist anime pages.
-// @author       Antigravity
+// @author       Groupiely
 // @match        https://anilist.co/anime/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=anilist.co
+// @updateURL    https://raw.githubusercontent.com/Groupiely/Zbeul/main/userscripts/anilist/userscript-first.user.js
+// @downloadURL  https://raw.githubusercontent.com/Groupiely/Zbeul/main/userscripts/anilist/userscript-first.user.js
 // @grant        none
 // ==/UserScript==
 

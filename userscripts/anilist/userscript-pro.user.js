@@ -1,11 +1,13 @@
 // ==UserScript==
 // @name         Anilist Streaming Links (Improved)
-// @namespace    https://github.com/user/anilist-streaming-links
+// @namespace    https://github.com/Groupiely/Zbeul
 // @version      1.0.0
 // @description  Injects streaming platform links into the Anilist anime page navigation bar.
-// @author       Claude
+// @author       Groupiely
 // @match        https://anilist.co/anime/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=anilist.co
+// @updateURL    https://raw.githubusercontent.com/Groupiely/Zbeul/main/userscripts/anilist/userscript-pro.user.js
+// @downloadURL  https://raw.githubusercontent.com/Groupiely/Zbeul/main/userscripts/anilist/userscript-pro.user.js
 // @grant        none
 // ==/UserScript==
 
