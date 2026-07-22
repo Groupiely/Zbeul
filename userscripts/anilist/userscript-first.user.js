@@ -58,8 +58,8 @@
         // Prevent adding multiple instances
         if (document.getElementById('custom-anilist-streaming-container')) return;
 
-        // Confirmed from live DOM: tabs live inside .browse-wrap .footer
-        const nav = document.querySelector('.browse-wrap .footer');
+        // Confirmed from live debug: anime tabs are in div.nav inside div.content
+        const nav = document.querySelector('.content .nav');
         if (!nav) return;
 
         const container = document.createElement('div');
@@ -117,7 +117,7 @@
             let attempts = 0;
             const checkDOM = setInterval(async () => {
                 // Wait for the nav element, since that's where we insert the links
-                if (document.querySelector('.browse-wrap .footer')) {
+                if (document.querySelector('.content .nav')) {
                     clearInterval(checkDOM);
                     const links = await fetchStreamingLinks(animeId);
                     // Prevent race condition: check if we are still on the same page

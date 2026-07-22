@@ -20,8 +20,8 @@
     const URL_CHECK_MS   = 500;  // ms — SPA navigation check
 
     // More specific selector to avoid matching arbitrary .nav elements on the page
-    // Confirmed from live DOM inspection: tabs (Overview, Watch...) live in .browse-wrap .footer
-    const NAV_SELECTOR   = '.browse-wrap .footer';
+    // Confirmed from live debug: anime tabs are in div.nav inside div.content
+    const NAV_SELECTOR   = '.content .nav';
 
     const GQL_ENDPOINT   = 'https://graphql.anilist.co';
 
